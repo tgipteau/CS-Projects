@@ -1,11 +1,4 @@
-# Défi 1 : table de hachage à adressage ouvert
-
-## Règles du jeu
-
-- Chaque défi comporte un énoncé, des contraintes, des questions de recherche (à traiter soi-même : articles, cours, documentation) et des critères de validation.
-- Aucune solution n'est fournie. En cas de blocage après une vraie tentative, demander un indice.
-- Le code et les mesures sont relus selon quatre axes : exactitude, gestion de la mémoire, complexité, qualité de l'interface.
-- Compilation avec `-Wall -Wextra -Wpedantic`. Tests exécutés avec `-fsanitize=address,undefined`. Mesures de performance faites **sans** sanitizers, avec `-O2`.
+# Table de hachage à adressage ouvert
 
 ## Énoncé
 
