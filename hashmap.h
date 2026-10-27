@@ -1,9 +1,14 @@
 #pragma once
+#include <stdint.h>
 
 typedef struct hashMap hashMap;
 
-struct hashMap * hm_create(void);
-void hm_init(struct hashMap *hm, int nb_entries);
-void hm_show(struct hashMap *hm);
-int hm_insert(struct hashMap *hm, int key, int dat);
-void hm_resize(struct hashMap *old_hm);
+typedef union {
+		intptr_t i;
+	} hm_value;
+
+struct hashMap * hm_init(void);
+void hm_state(struct hashMap *hm);
+int hm_insert(struct hashMap *hm, int key, hm_value val);
+int hm_read(struct hashMap *hm, int key, hm_value *val);
+int hm_delete(struct hashMap *hm, int key);
