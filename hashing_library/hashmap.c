@@ -1,13 +1,16 @@
 #include "hashmap.h"
+#include <assert.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #define LOAD_FACTOR 0.75
 #define INIT_SIZE 16
-#define MAX_STATE_SHOW 256
 
-enum hashType {DEL_TYPE, EMPTY_TYPE, OCCUPIED_TYPE};
+#define MAX_STATE_SHOW 256
+#define LINE_W 12
+
+enum hashType {EMPTY_TYPE, OCCUPIED_TYPE, DEL_TYPE};
 
 struct hashEntry {
 	int key;
@@ -21,17 +24,21 @@ struct hashMap {
 	struct hashEntry *data;
 };
 
-
 static int hm_find(struct hashMap *hm, int key){
 
+	assert(key>=0);
 	int idx = key % hm->size;
 	while(1){
-		if (idx>=(int)hm->size || hm->data[idx].entry_type == EMPTY_TYPE)
+		if (hm->data[idx].entry_type == EMPTY_TYPE)
 			return -1; // search fail
 		if (hm->data[idx].key == key && hm->data[idx].entry_type == OCCUPIED_TYPE)
 			return idx; // match
-		else
+		else{
+			//loop over end
 			idx++;
+			idx %= hm->size;
+		}
+
 	}
 }
 
@@ -45,9 +52,14 @@ static void hm_resize(struct hashMap *hm){
 	for (size_t n=0 ; n<hm->size ; n++){
 		struct hashEntry *e = &hm->data[n];
 
-		if (e->entry_type == EMPTY_TYPE) continue;
+		if (e->entry_type != OCCUPIED_TYPE) continue;
 
 		int h_idx = e->key % new_size;
+		//linear probing
+		while(new_data[h_idx].entry_type == OCCUPIED_TYPE){
+			h_idx++;
+			h_idx %= new_size;
+		}
 		new_data[h_idx] = *e;
 	}
 
@@ -65,17 +77,17 @@ struct hashMap * hm_init(void){
 }
 
 void hm_state(struct hashMap *hm){
-	// show in lines of 15 elements
-	const int line_width = 15;
 	const int nb_show = (int)hm->size>MAX_STATE_SHOW? MAX_STATE_SHOW:(int)hm->size;
 
 	for (int i=0; i<nb_show; i++){
 
-		if (i%line_width==0)
-			printf("[%3d->%3d]%-6c", i, i+line_width-1, ' ');
+		if (i%LINE_W==0)
+			printf("\n[%3d->%3d]%-6c", i, i+LINE_W-1, ' ');
 
 		if ((int)hm->data[i].entry_type == EMPTY_TYPE)
 			printf("%4c ", '.');
+		else if ((int)hm->data[i].entry_type == DEL_TYPE)
+			printf("%4c ", 'x');
 		else
 			printf("%4d ", (int)hm->data[i].val.i);
 		/*
@@ -94,39 +106,48 @@ void hm_state(struct hashMap *hm){
 				break;
 				}*/
 
-		if ((i+1)%line_width==0)
-			printf("\n");
 	}
-	printf("END\n");
-	printf("LOAD: %4d / %4d\t LOAD_FACTOR: %4f\n",
+	printf("\nLOAD: %4d / %4d\t LOAD_FACTOR: %4f\n",
 	 	hm->load, (int)hm->size, (float)hm->load/hm->size);
 
 }
 
-int hm_insert(struct hashMap *hm, int key, hm_value val){
+int hm_upsert(struct hashMap *hm, int key, hm_value val){
 	// checkup load and resize if needed
 	if ((float)(hm->load+1) / hm->size > LOAD_FACTOR)
 		hm_resize(hm);
 
+	// replace if existing key
+
+	assert(key>=0);
 	int hash_idx = key % hm->size;
 	while(1){
 
 		if (hm->data[hash_idx].entry_type != OCCUPIED_TYPE){
-
+			// insert
 			hm->data[hash_idx].key = key;
 			hm->data[hash_idx].entry_type = OCCUPIED_TYPE;
 			hm->data[hash_idx].val = val;
 			hm->load++;
-			break;
+			break; // should return "insert" indicator
 		}
-		else
+		else if (hm->data[hash_idx].key == key){
+			// replace
+			hm->data[hash_idx].val = val; // naive
+			// should return "replaced" indicator. Potential memory leak ?
+		}
+		else {
 			hash_idx++;
+			hash_idx %= hm->size; // loop over end
+		}
+
 	}
 	return hash_idx; // DEBUG !
 }
 
 int hm_read(struct hashMap *hm, int key, hm_value *val){
 
+	assert(key>=0);
 	int idx = hm_find(hm, key);
 	if (idx==-1) return 0; // no match.
 	else
@@ -138,9 +159,17 @@ int hm_read(struct hashMap *hm, int key, hm_value *val){
 }
 
 int hm_delete(struct hashMap *hm, int key){
+
+	assert(key>=0);
 	int idx = hm_find(hm, key);
 	if (idx==-1) return 0;
 
 	hm->data[idx].entry_type=DEL_TYPE;
+	hm->load--;
 	return 1;
+}
+
+void hm_free(struct hashMap *hm){
+	free(hm->data);
+	free(hm);
 }

@@ -1,5 +1,5 @@
-CC = clang
-CFLAGS = -Wall -Wextra -Wpedantic -fsanitize=address,undefined
+CC = gcc
+CFLAGS = -Wall -Wextra -Wpedantic -fsanitize=address,undefined,
 
 
 
