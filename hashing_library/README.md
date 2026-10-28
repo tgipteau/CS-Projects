@@ -58,12 +58,3 @@ Consigner les réponses dans un fichier `NOTES.md`.
 - CLRS, chapitre sur les tables de hachage.
 - Articles sur le *linear probing* et le *Robin Hood hashing*.
 
-## Défis suivants (feuille de route ajustable)
-
-2. File de priorité : tas binaire générique, puis tri par tas.
-3. Allocateur : *arena*, puis allocateur à listes libres avec fusion des blocs.
-4. Graphes : listes d'adjacence contiguës, BFS/DFS, Dijkstra, A\* sur la carte du raycaster.
-5. Arbre équilibré (AVL ou *treap*) avec vérification des invariants.
-6. Analyse de JSON : descente récursive, union étiquetée, entrées aléatoires et mal formées.
-7. Compression : Huffman, puis LZ77.
-8. Machine virtuelle : jeu d'instructions, assembleur, interpréteur d'octets.
