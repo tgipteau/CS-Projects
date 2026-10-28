@@ -8,7 +8,7 @@ Chaque projet suit la même démarche : un énoncé, des contraintes, des questi
 
 | Projet | Sujet | Dépôt |
 |---|---|---|
-| Table de hachage | Adressage ouvert avec sondage linéaire, clés chaînes, valeurs de type `union` | [hashing_table](https://github.com/tgipteau/hashing_table) |
+| Table de hachage | Adressage ouvert avec sondage linéaire, clés chaînes, valeurs de type `union` | [hashing_table](https://github.com/tgipteau/CS-projects/hashing_table) |
 
 ## Outils et conventions
 
