@@ -44,8 +44,6 @@ static int hm_find(struct hashMap *hm, int key){
 
 static void hm_resize(struct hashMap *hm){
 
-	printf("Resizing...\n");
-
 	size_t new_size = hm->size*2;
 	struct hashEntry *new_data = calloc(new_size, sizeof(*new_data));
 
@@ -120,29 +118,32 @@ int hm_upsert(struct hashMap *hm, int key, hm_value val){
 	// replace if existing key
 
 	assert(key>=0);
-	int hash_idx = key % hm->size;
-	while(1){
 
-		if (hm->data[hash_idx].entry_type != OCCUPIED_TYPE){
-			// insert
-			hm->data[hash_idx].key = key;
-			hm->data[hash_idx].entry_type = OCCUPIED_TYPE;
-			hm->data[hash_idx].val = val;
-			hm->load++;
-			break; // should return "insert" indicator
-		}
-		else if (hm->data[hash_idx].key == key){
-			// replace
-			hm->data[hash_idx].val = val; // naive
-			// should return "replaced" indicator. Potential memory leak ?
-		}
-		else {
-			hash_idx++;
-			hash_idx %= hm->size; // loop over end
-		}
 
+	int found_idx = hm_find(hm, key);
+
+	if (found_idx==-1){
+		// insert
+		int hash_idx = key % hm->size;
+		while(1){
+			if (hm->data[hash_idx].entry_type != OCCUPIED_TYPE){
+				hm->data[hash_idx].key = key;
+				hm->data[hash_idx].entry_type = OCCUPIED_TYPE;
+				hm->data[hash_idx].val = val;
+				hm->load++;
+				return 0; // insert indicator
+				}
+			else {
+				hash_idx++;
+				hash_idx %= hm->size; // loop over end
+			}
+		}
 	}
-	return hash_idx; // DEBUG !
+	else {
+		// update
+		hm->data[found_idx].val = val;
+		return 1; // update indicator
+	}
 }
 
 int hm_read(struct hashMap *hm, int key, hm_value *val){
