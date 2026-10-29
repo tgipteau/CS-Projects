@@ -89,43 +89,6 @@ struct hashMap * hm_init(void){
 	return hm;
 }
 
-void hm_state(struct hashMap *hm){
-	const int nb_show = (int)hm->size>MAX_STATE_SHOW? MAX_STATE_SHOW:(int)hm->size;
-
-	for (int i=0; i<nb_show; i++){
-
-		if (i%LINE_W==0)
-			printf("\n[%3d->%3d]%-6c", i, i+LINE_W-1, ' ');
-
-		if ((int)hm->data[i].entry_type == EMPTY_TYPE)
-			printf("%4c ", '.');
-		else if ((int)hm->data[i].entry_type == DEL_TYPE)
-			printf("%4c ", 'x');
-		else
-			printf("%4d ", (int)hm->data[i].val.i);
-		/*
-		switch (hm->data[i].entry_type) {
-			case INT_TYPE:
-				printf("%d  ", (int)hm->data[i].data.i);
-				break;
-			case UINT_TYPE:
-				printf("%d  ", (int)hm->data[i].data.u);
-				break;
-			case VPTR_TYPE:
-				printf("X  ");
-				break;
-			case STR_TYPE:
-				printf("%s  ", hm->data[i].data.s);
-				break;
-				}*/
-
-	}
-	printf("\nLOAD ALIVE: %4d / %4d\n",hm->load_alive, (int)hm->size);
-	printf("LOAD DEAD: %4d / %4d\n",hm->load_dead, (int)hm->size);
-	printf("LOAD FACTOR: %4f\n", (float)(hm->load_alive+hm->load_dead)/hm->size);
-
-}
-
 int hm_upsert(struct hashMap *hm, int key, hm_value val){
 
 	// checkup load and resize if needed
@@ -190,7 +153,48 @@ int hm_delete(struct hashMap *hm, int key){
 	return 1;
 }
 
+int hm_len(struct hashMap *hm){
+	return hm->load_alive;
+}
+
 void hm_free(struct hashMap *hm){
 	free(hm->data);
 	free(hm);
+}
+
+void hm_state(struct hashMap *hm){
+	const int nb_show = (int)hm->size>MAX_STATE_SHOW? MAX_STATE_SHOW:(int)hm->size;
+
+	for (int i=0; i<nb_show; i++){
+
+		if (i%LINE_W==0)
+			printf("\n[%3d->%3d]%-6c", i, i+LINE_W-1, ' ');
+
+		if ((int)hm->data[i].entry_type == EMPTY_TYPE)
+			printf("%4c ", '.');
+		else if ((int)hm->data[i].entry_type == DEL_TYPE)
+			printf("%4c ", 'x');
+		else
+			printf("%4d ", (int)hm->data[i].val.i);
+		/*
+		switch (hm->data[i].entry_type) {
+			case INT_TYPE:
+				printf("%d  ", (int)hm->data[i].data.i);
+				break;
+			case UINT_TYPE:
+				printf("%d  ", (int)hm->data[i].data.u);
+				break;
+			case VPTR_TYPE:
+				printf("X  ");
+				break;
+			case STR_TYPE:
+				printf("%s  ", hm->data[i].data.s);
+				break;
+				}*/
+
+	}
+	printf("\nLOAD ALIVE: %4d / %4d\n",hm->load_alive, (int)hm->size);
+	printf("LOAD DEAD: %4d / %4d\n",hm->load_dead, (int)hm->size);
+	printf("LOAD FACTOR: %4f\n", (float)(hm->load_alive+hm->load_dead)/hm->size);
+
 }

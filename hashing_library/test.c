@@ -34,7 +34,7 @@ int main(void){
 	};
 
 	// Creating hashmap
-	hashMap *hm = hm_init();
+	hm_hashMap *hm = hm_init();
 	int r1, r2; // return values for hm and l operations
 
 	// Random inserts, deletes and reads
