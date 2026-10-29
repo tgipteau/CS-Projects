@@ -45,6 +45,7 @@ static int hm_find(struct hashMap *hm, int key){
 static void hm_resize(struct hashMap *hm){
 
 	size_t new_size = hm->size*2;
+	int new_load = 0; // load is freed of tombstones
 	struct hashEntry *new_data = calloc(new_size, sizeof(*new_data));
 
 	for (size_t n=0 ; n<hm->size ; n++){
@@ -59,11 +60,13 @@ static void hm_resize(struct hashMap *hm){
 			h_idx %= new_size;
 		}
 		new_data[h_idx] = *e;
+		new_load++;
 	}
 
 	free(hm->data);
 	hm->data = new_data;
 	hm->size = new_size;
+	hm->load = new_load;
 
 }
 
@@ -71,6 +74,7 @@ struct hashMap * hm_init(void){
 	struct hashMap *hm = calloc(1, sizeof(*hm));
 	hm->size = INIT_SIZE;
 	hm->data = calloc(hm->size, sizeof(struct hashEntry));
+	hm->nb_empty_slots = hm->size;
 	return hm;
 }
 
@@ -111,6 +115,7 @@ void hm_state(struct hashMap *hm){
 }
 
 int hm_upsert(struct hashMap *hm, int key, hm_value val){
+
 	// checkup load and resize if needed
 	if ((float)(hm->load+1) / hm->size > LOAD_FACTOR)
 		hm_resize(hm);
@@ -166,7 +171,6 @@ int hm_delete(struct hashMap *hm, int key){
 	if (idx==-1) return 0;
 
 	hm->data[idx].entry_type=DEL_TYPE;
-	hm->load--;
 	return 1;
 }
 
