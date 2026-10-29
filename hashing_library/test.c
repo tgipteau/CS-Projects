@@ -8,8 +8,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define SEED 1
-#define NB_ITER 200000
+#define NB_INSERTS 200000
+#define NB_DELETES 50000
+#define NB_SEARCHES 50000
 
 typedef struct List{
 	int *dat;
@@ -25,85 +26,97 @@ int main(void){
 
 	// reference is an unordered array of size 2500
 	List l = {
-		.dat = malloc(NB_ITER*sizeof(int)),
-		.key = malloc(NB_ITER*sizeof(int)),
+		.dat = malloc(NB_INSERTS*sizeof(int)),
+		.key = malloc(NB_INSERTS*sizeof(int)),
 		.len = 0,
 	};
 
 	// Creating hashmap
 	hashMap *hm = hm_init();
-
-	// Random inserts, deletes and reads
-	srand(SEED);
-	printf("\nPerforming %d random operations.\n", NB_ITER);
-
 	int r1, r2; // return values for hm and l operations
 
-	for (int i=0 ; i<NB_ITER; i++){
+	for (int seed=0 ; seed<20 ; seed++){
+		// Random inserts, deletes and reads
+		srand(seed);
+		printf("\nPerforming %d random inserts.\n", NB_INSERTS);
 
-		if (i%(NB_ITER/10)==0) printf("Performing... %d/%d.\n", i, NB_ITER); // progress print
+		for (int i=0 ; i<NB_INSERTS; i++){
 
-		int dat = rand()%3000;
-		int key = rand()%100;
-		hm_value hdat = { .i = dat};
+			if (i%(NB_INSERTS/10)==0) printf("Performing inserts... %d/%d.\n",
+				i, NB_INSERTS); // progress print
 
-		int op = rand()%3;
+			int dat = rand()%3000;
+			int key = rand()%100;
+			hm_value hdat = { .i = dat};
 
-
-		switch (op) {
-			case 0:
-				// upsert
-				r1 = hm_upsert(hm, key, hdat);
-				r2 = list_upsert(&l, key, dat);
-				if (r1!=r2){
-					printf("Upsert error at iter %d.\n", i);
-					printf("Key: %d, Dat: %d\n", key, dat);
-					printf("Incoherent update vs insert. r_hm: %d, r_list: %d\n", r1, r2);
-					printf("(insert->0, update->1)\n");
-					printf("Error seed : %d\n", SEED);
-					return EXIT_FAILURE;
-
-				}
-				break;
-
-			case 1:
-				// delete
-				r1 = hm_delete(hm, key);
-				r2 = list_delete(&l, key);
-				if (r1!=r2){
-					printf("Delete error at iter %d.\n", i);
-					printf("Key: %d\n", key);
-					printf("Key not found. r_hm: %d, r_list: %d\n", r1, r2);
-					printf("(not_found->0, found->1)\n");
-					printf("Error seed : %d\n", SEED);
-					return EXIT_FAILURE;
-
-				}
-				break;
-
-			case 2:
-				// read
-				r1 = hm_read(hm, key, &hdat);
-				r2 = list_read(l, key, &dat);
-				if (r1!=r2){
-					printf("Read error at iter %d.\n", i);
-					printf("Key not found. r_hm: %d, r_list: %d\n", r1, r2);
-					printf("(not_found->0, found->1)\n");
-					printf("Error seed : %d\n", SEED);
-					return EXIT_FAILURE;
-
-				}
-				if (hdat.i!=dat){
-					printf("Read error at iter %d.\n", i);
-					printf("Key: %d\n", key);
-					printf("Incoherent read. r_hm: %d, r_list: %d\n", (int)hdat.i, dat);
-					printf("Error seed : %d\n", SEED);
-					return EXIT_FAILURE;
-				}
-				break;
+			// upsert
+			r1 = hm_upsert(hm, key, hdat);
+			r2 = list_upsert(&l, key, dat);
+			if (r1!=r2){
+				printf("Upsert error at iter %d.\n", i);
+				printf("Key: %d, Dat: %d\n", key, dat);
+				printf("Incoherent update vs insert. r_hm: %d, r_list: %d\n", r1, r2);
+				printf("(insert->0, update->1)\n");
+				printf("Error seed : %d\n", seed);
+				return EXIT_FAILURE;
+			}
 		}
-	}
 
+		printf("\nPerforming %d random deletes.\n", NB_INSERTS);
+
+		for (int i=0 ; i<NB_DELETES; i++){
+
+			if (i%(NB_DELETES/10)==0) printf("Performing deletes... %d/%d.\n",
+				i, NB_DELETES); // progress print
+
+			int key = rand()%100;
+
+			// delete
+			r1 = hm_delete(hm, key);
+			r2 = list_delete(&l, key);
+			if (r1!=r2){
+				printf("Delete error at iter %d.\n", i);
+				printf("Key: %d\n", key);
+				printf("Key not found. r_hm: %d, r_list: %d\n", r1, r2);
+				printf("(not_found->0, found->1)\n");
+				printf("Error seed : %d\n", seed);
+				return EXIT_FAILURE;
+
+			}
+		}
+
+		printf("\nPerforming %d random searches.\n", NB_INSERTS);
+
+		for (int i=0 ; i<NB_SEARCHES; i++){
+
+			int dat = rand()%3000;
+			int key = rand()%100;
+			hm_value hdat = { .i = dat};
+
+			if (i%(NB_SEARCHES/10)==0) printf("Performing searches... %d/%d.\n",
+				i, NB_SEARCHES); // progress print
+
+			// read
+			r1 = hm_read(hm, key, &hdat);
+			r2 = list_read(l, key, &dat);
+			if (r1!=r2){
+				printf("Read error at iter %d.\n", i);
+				printf("Key not found. r_hm: %d, r_list: %d\n", r1, r2);
+				printf("(not_found->0, found->1)\n");
+				printf("Error seed : %d\n", seed);
+				return EXIT_FAILURE;
+
+			}
+			if (hdat.i!=dat){
+				printf("Read error at iter %d.\n", i);
+				printf("Key: %d\n", key);
+				printf("Incoherent read. r_hm: %d, r_list: %d\n", (int)hdat.i, dat);
+				printf("Error seed : %d\n", seed);
+				return EXIT_FAILURE;
+			}
+		}
+
+	}
 
 	hm_free(hm);
 	return EXIT_SUCCESS;
@@ -149,7 +162,7 @@ int list_upsert(List *l, int k, int dat){
 	}
 
 	// insert scenario
-	assert(l->len<NB_ITER);
+	assert(l->len<NB_INSERTS);
 	l->key[l->len] = k;
 	l->dat[l->len] = dat;
 	l->len++;
