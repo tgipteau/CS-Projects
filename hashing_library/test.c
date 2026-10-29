@@ -4,10 +4,12 @@
 
 #include "hashmap.h"
 #include <assert.h>
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#define SEED 1
 #define NB_INSERTS 200000
 #define NB_DELETES 50000
 #define NB_SEARCHES 50000
@@ -35,92 +37,93 @@ int main(void){
 	hashMap *hm = hm_init();
 	int r1, r2; // return values for hm and l operations
 
-	for (int seed=0 ; seed<20 ; seed++){
-		// Random inserts, deletes and reads
-		srand(seed);
-		printf("\nPerforming %d random inserts.\n", NB_INSERTS);
+	// Random inserts, deletes and reads
+	srand(SEED);
+	printf("\nPerforming %d random inserts...\n", NB_INSERTS);
 
-		for (int i=0 ; i<NB_INSERTS; i++){
+	for (int i=0 ; i<NB_INSERTS; i++){
 
-			if (i%(NB_INSERTS/10)==0) printf("Performing inserts... %d/%d.\n",
-				i, NB_INSERTS); // progress print
 
-			int dat = rand()%3000;
-			int key = rand()%100;
-			hm_value hdat = { .i = dat};
+		int dat = rand()%3000;
+		int key = rand()%100;
+		hm_value hdat = { .i = dat};
 
-			// upsert
-			r1 = hm_upsert(hm, key, hdat);
-			r2 = list_upsert(&l, key, dat);
-			if (r1!=r2){
-				printf("Upsert error at iter %d.\n", i);
-				printf("Key: %d, Dat: %d\n", key, dat);
-				printf("Incoherent update vs insert. r_hm: %d, r_list: %d\n", r1, r2);
-				printf("(insert->0, update->1)\n");
-				printf("Error seed : %d\n", seed);
-				return EXIT_FAILURE;
-			}
+		// upsert
+		r1 = hm_upsert(hm, key, hdat);
+		r2 = list_upsert(&l, key, dat);
+		if (r1!=r2){
+			printf("Upsert error at iter %d.\n", i);
+			printf("Key: %d, Dat: %d\n", key, dat);
+			printf("Incoherent update vs insert. r_hm: %d, r_list: %d\n", r1, r2);
+			printf("(insert->0, update->1)\n");
+			printf("Error SEED : %d\n", SEED);
+			return EXIT_FAILURE;
 		}
+	}
 
-		printf("\nPerforming %d random deletes.\n", NB_INSERTS);
+	printf("\nPerforming %d random deletes.\n", NB_INSERTS);
 
-		for (int i=0 ; i<NB_DELETES; i++){
+	for (int i=0 ; i<NB_DELETES; i++){
 
-			if (i%(NB_DELETES/10)==0) printf("Performing deletes... %d/%d.\n",
-				i, NB_DELETES); // progress print
+		int key = rand()%100;
 
-			int key = rand()%100;
+		// delete
+		r1 = hm_delete(hm, key);
+		r2 = list_delete(&l, key);
+		if (r1!=r2){
+			printf("Delete error at iter %d.\n", i);
+			printf("Key: %d\n", key);
+			printf("Key not found. r_hm: %d, r_list: %d\n", r1, r2);
+			printf("(not_found->0, found->1)\n");
+			printf("Error SEED : %d\n", SEED);
+			return EXIT_FAILURE;
 
-			// delete
-			r1 = hm_delete(hm, key);
-			r2 = list_delete(&l, key);
-			if (r1!=r2){
-				printf("Delete error at iter %d.\n", i);
-				printf("Key: %d\n", key);
-				printf("Key not found. r_hm: %d, r_list: %d\n", r1, r2);
-				printf("(not_found->0, found->1)\n");
-				printf("Error seed : %d\n", seed);
-				return EXIT_FAILURE;
-
-			}
 		}
+	}
 
-		printf("\nPerforming %d random searches.\n", NB_INSERTS);
+	printf("\nPerforming %d random searches.\n", NB_INSERTS);
 
-		for (int i=0 ; i<NB_SEARCHES; i++){
+	for (int i=0 ; i<NB_SEARCHES; i++){
 
-			int dat = rand()%3000;
-			int key = rand()%100;
-			hm_value hdat = { .i = dat};
+		int dat = rand()%3000;
+		int key = rand()%100;
+		hm_value hdat = { .i = dat};
 
-			if (i%(NB_SEARCHES/10)==0) printf("Performing searches... %d/%d.\n",
-				i, NB_SEARCHES); // progress print
+		// read
+		r1 = hm_read(hm, key, &hdat);
+		r2 = list_read(l, key, &dat);
+		if (r1!=r2){
+			printf("Read error at iter %d.\n", i);
+			printf("Key not found. r_hm: %d, r_list: %d\n", r1, r2);
+			printf("(not_found->0, found->1)\n");
+			printf("Error SEED : %d\n", SEED);
+			return EXIT_FAILURE;
 
-			// read
-			r1 = hm_read(hm, key, &hdat);
-			r2 = list_read(l, key, &dat);
-			if (r1!=r2){
-				printf("Read error at iter %d.\n", i);
-				printf("Key not found. r_hm: %d, r_list: %d\n", r1, r2);
-				printf("(not_found->0, found->1)\n");
-				printf("Error seed : %d\n", seed);
-				return EXIT_FAILURE;
-
-			}
-			if (hdat.i!=dat){
-				printf("Read error at iter %d.\n", i);
-				printf("Key: %d\n", key);
-				printf("Incoherent read. r_hm: %d, r_list: %d\n", (int)hdat.i, dat);
-				printf("Error seed : %d\n", seed);
-				return EXIT_FAILURE;
-			}
 		}
-
+		if (hdat.i!=dat){
+			printf("Read error at iter %d.\n", i);
+			printf("Key: %d\n", key);
+			printf("Incoherent read. r_hm: %d, r_list: %d\n", (int)hdat.i, dat);
+			printf("Error SEED : %d\n", SEED);
+			return EXIT_FAILURE;
+		}
 	}
 
 	hm_free(hm);
-	return EXIT_SUCCESS;
 
+
+	printf("\nTesting tombstone saturation handling (%d tombstones).\n", NB_INSERTS);
+	hm = hm_init();
+
+	for (int i=0; i<NB_INSERTS ; i++){
+		// inserting and deleting at once, multiplying tombstones
+		hm_upsert(hm, i, (hm_value){.i=1});
+		hm_delete(hm, i);
+	}
+	printf("Showing hm state after tombstone flooding.\n");
+	hm_state(hm);
+
+	return EXIT_SUCCESS;
 }
 
 int list_read(List l, int k, int *result){
