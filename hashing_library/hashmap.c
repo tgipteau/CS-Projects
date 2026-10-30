@@ -1,11 +1,17 @@
 #include "hashmap.h"
 #include <assert.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define LOAD_FACTOR 0.75
 #define INIT_SIZE 16
+
+#define FNV_HASH_SIZE 32
+#define FNV_OFFSET_BASIS 2166136261
+#define FNV_PRIME 16777619
 
 #define MAX_STATE_SHOW 256
 #define LINE_W 12
@@ -13,7 +19,8 @@
 enum hashType {EMPTY_TYPE, OCCUPIED_TYPE, DEL_TYPE};
 
 struct hashEntry {
-	int key;
+	char *key;
+	long fnv_hash;
 	enum hashType entry_type;
 	hm_value val;
 };
@@ -25,10 +32,22 @@ struct hashMap {
 	struct hashEntry *data;
 };
 
-static int hm_find(struct hashMap *hm, int key){
+uint32_t fnv_key(char *key){
+	uint32_t hash = FNV_OFFSET_BASIS;
+	size_t i=0;
+	while(key[i]!='\0'){
+		hash = hash ^ key[i];
+		hash = hash * FNV_PRIME;
+		i++;
+	}
 
-	assert(key>=0);
-	int idx = key % hm->size;
+	return hash;
+}
+
+/*
+static int hm_find(struct hashMap *hm, char *key){
+
+	int idx = (int)(fnv_key(key) % (int)hm->size);
 	while(1){
 		if (hm->data[idx].entry_type == EMPTY_TYPE)
 			return -1; // search fail
@@ -94,11 +113,6 @@ int hm_upsert(struct hashMap *hm, int key, hm_value val){
 	// checkup load and resize if needed
 	if ((float)(hm->load_alive+hm->load_dead) / hm->size > LOAD_FACTOR)
 		hm_resize(hm);
-
-	// replace if existing key
-
-	assert(key>=0);
-
 
 	int found_idx = hm_find(hm, key);
 
@@ -176,21 +190,6 @@ void hm_state(struct hashMap *hm){
 			printf("%4c ", 'x');
 		else
 			printf("%4d ", (int)hm->data[i].val.i);
-		/*
-		switch (hm->data[i].entry_type) {
-			case INT_TYPE:
-				printf("%d  ", (int)hm->data[i].data.i);
-				break;
-			case UINT_TYPE:
-				printf("%d  ", (int)hm->data[i].data.u);
-				break;
-			case VPTR_TYPE:
-				printf("X  ");
-				break;
-			case STR_TYPE:
-				printf("%s  ", hm->data[i].data.s);
-				break;
-				}*/
 
 	}
 	printf("\nLOAD ALIVE: %4d / %4d\n",hm->load_alive, (int)hm->size);
@@ -199,4 +198,4 @@ void hm_state(struct hashMap *hm){
 
 }
 
-/* last int key type commit */
+*/

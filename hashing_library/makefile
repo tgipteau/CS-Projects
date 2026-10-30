@@ -1,12 +1,11 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -Wpedantic -fsanitize=address,undefined,
 
-manip: manip.o
+manip: manip.o hashmap.o
 	$(CC) -o manip manip.o hashmap.o $(CFLAGS)
 
 manip.o: manip.c hashmap.h
 	$(CC) -c manip.c -o manip.o $(CFLAGS)
-
 
 test: test.o hashmap.o
 	$(CC) -o test test.o hashmap.o $(CFLAGS)
