@@ -198,3 +198,5 @@ void hm_state(struct hashMap *hm){
 	printf("LOAD FACTOR: %4f\n", (float)(hm->load_alive+hm->load_dead)/hm->size);
 
 }
+
+/* last int key type commit */
