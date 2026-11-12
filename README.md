@@ -7,6 +7,8 @@ Ce dépôt rassemble des projets d'informatique fondamentale écrits en C, et in
 | Projet | Sujet | Dépôt |
 |---|---|---|
 | Table de hachage | Adressage ouvert avec sondage linéaire, clés chaînes, valeurs de type `union` | [hashing_library](https://github.com/tgipteau/CS-Projects/tree/main/hashing_library) |
+| Shell en C | Construction d'un shell minimal (mini-projet) avec appels systèmes et forks | [shell](https://github.com/tgipteau/CS-Projects/tree/main/shell) |
+| Programmation TCP | Apprentissage de la programmation réseau en C (TCP uniquement) | [networking](https://github.com/tgipteau/CS-Projects/tree/main/networking) |
 
 ## Lectures / Ressources
 
