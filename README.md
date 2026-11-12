@@ -1,6 +1,6 @@
 # Projets CS
 
-Ce dépôt rassemble des projets d'informatique fondamentale écrits en C, et inspirés par mes lectures et recherches personnelles.
+Ce dépôt rassemble des projets fondamentaux écrits en C, et inspirés par mes lectures et recherches personnelles.
 
 ## Projets
 
