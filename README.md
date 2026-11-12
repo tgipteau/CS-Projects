@@ -14,8 +14,3 @@ Ce dépôt rassemble des projets d'informatique fondamentale écrits en C, et in
 
 - [MIT 6.006 Introduction to Algorithms](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/)
 
-## Outils et conventions
-
-- Compilation : `-Wall -Wextra -Wpedantic`.
-- Tests exécutés avec `-fsanitize=address,undefined`.
-- Mesures de performance faites sans sanitizers, avec `-O2`.
