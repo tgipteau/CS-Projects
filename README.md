@@ -2,8 +2,6 @@
 
 Ce dépôt rassemble des projets d'informatique fondamentale écrits en C, et inspirés par mes lectures et recherches personnelles.
 
-Chaque projet contient un énoncé, des contraintes, des questions de recherche auxquelles je réponds dans des notes, puis des critères de validation (tests, sanitizers, mesures de performance).
-
 ## Projets
 
 | Projet | Sujet | Dépôt |
